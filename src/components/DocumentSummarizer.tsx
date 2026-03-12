@@ -20,7 +20,7 @@ import {
   ChevronRight 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import BlackHoleLoader from "./gargantua";
+
 import DocuMindLoader from "./DocuMindLoader";
 const DocumentSummarizer = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
