@@ -8,11 +8,34 @@ import type {
   Paper,
   UploadResponse,
   AnalysisResponse,
-  StatsResponse
+  StatsResponse,
+  SummaryResponse
 } from "../types/api";
 
+const trimSlash = (value: string) => value.replace(/\/+$/, "");
+
+const resolveApiBaseUrl = (): string => {
+  const explicit = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+  if (explicit) {
+    return trimSlash(explicit);
+  }
+
+  const localBase = trimSlash(
+    ((import.meta.env.VITE_API_LOCAL_BASE_URL as string | undefined) || "http://127.0.0.1:8000/ai").trim()
+  );
+  const renderBase = trimSlash(
+    ((import.meta.env.VITE_API_PROD_BASE_URL as string | undefined) ||
+      "https://multi-modal-agent-backend.onrender.com/ai").trim()
+  );
+
+  const host = window.location.hostname;
+  const isLocalHost = host === "localhost" || host === "127.0.0.1";
+
+  return isLocalHost ? localBase : renderBase;
+};
+
 const API = axios.create({
-  baseURL: "https://multi-modal-agent-backend.onrender.com/ai",
+  baseURL: resolveApiBaseUrl(),
 });
 
 /* ======================================================
@@ -91,8 +114,8 @@ export const askPaper = async (
 // Summary
 export const getSummary = async (
   paperId: number
-) => {
-  const response = await API.get(`/summary/${paperId}`);
+) : Promise<SummaryResponse> => {
+  const response = await API.get<SummaryResponse>(`/summary/${paperId}`);
   return response.data;
 };
 

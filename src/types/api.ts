@@ -54,6 +54,9 @@ export interface AskResponse {
 
 export interface SummaryResponse {
   summary: string;
+  fact_points?: string[];
+  analysis_time_sec?: number;
+  precomputed?: boolean;
 }
 
 export interface TeachResponse {

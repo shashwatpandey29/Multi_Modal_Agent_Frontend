@@ -74,10 +74,10 @@ const ImageGenerator = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-6xl mx-auto gap-6">
+    <div className="flex flex-col h-full min-h-0 max-w-6xl mx-auto gap-4 sm:gap-6">
       
       {/* 1. Control Panel & Input */}
-      <div className="bg-[#1e1e20] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
+      <div className="bg-[#1e1e20] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative group">
             <input
@@ -93,7 +93,7 @@ const ImageGenerator = () => {
           <button
             onClick={handleSubmit}
             disabled={loading || !prompt}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-8 py-4 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed text-white"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 sm:px-8 py-4 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 min-w-[140px] sm:min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed text-white"
           >
             {loading ? <span className="animate-pulse">Dreaming...</span> : "Generate"} 
             {!loading && <Sparkles size={18} />}
@@ -149,7 +149,7 @@ const ImageGenerator = () => {
       </div>
 
       {/* 2. Main Canvas Area */}
-      <div className="flex-1 flex gap-6 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 sm:gap-6 min-h-0">
         {/* Main Image Display */}
         <div className="flex-1 bg-[#151516] border border-white/5 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden">
             {loading ? (
@@ -202,8 +202,8 @@ const ImageGenerator = () => {
 
         {/* 3. History Sidebar (Right Side) */}
         {history.length > 0 && (
-            <div className="w-24 md:w-32 bg-[#1e1e20] border border-white/10 rounded-2xl p-3 overflow-y-auto space-y-3 custom-scrollbar">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center mb-2">History</h3>
+          <div className="w-full lg:w-32 bg-[#1e1e20] border border-white/10 rounded-2xl p-3 overflow-x-auto lg:overflow-y-auto space-x-3 lg:space-x-0 lg:space-y-3 custom-scrollbar flex lg:block">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center mb-2 hidden lg:block">History</h3>
                 <AnimatePresence>
                     {history.map((img) => (
                         <motion.button
@@ -211,7 +211,7 @@ const ImageGenerator = () => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             onClick={() => setSelectedImage(img)}
-                            className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                  className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-full lg:h-auto lg:aspect-square rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
                                 selectedImage?.id === img.id ? "border-indigo-500 shadow-lg shadow-indigo-500/20" : "border-transparent opacity-60 hover:opacity-100"
                             }`}
                         >

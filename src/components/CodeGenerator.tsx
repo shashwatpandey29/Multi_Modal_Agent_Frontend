@@ -20,7 +20,7 @@ const CodeGenerator = () => {
     try {
       const data = await generateCode({ prompt });
       setResult(data.generated_code);
-    } catch (error) {
+    } catch {
       setResult("// Error generating code. Please try again.");
     } finally {
       setLoading(false);
@@ -34,7 +34,7 @@ const CodeGenerator = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
       {/* Input Section - Styled like a Terminal Command */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
@@ -51,7 +51,7 @@ const CodeGenerator = () => {
           </div>
 
           <textarea
-            className="w-full p-6 bg-[#0a0a0b] focus:outline-none resize-none text-gray-200 placeholder-gray-600 font-mono text-sm leading-relaxed"
+            className="w-full p-4 sm:p-6 bg-[#0a0a0b] focus:outline-none resize-none text-gray-200 placeholder-gray-600 font-mono text-sm leading-relaxed"
             placeholder="// Describe the function, component, or algorithm you need..."
             rows={4}
             value={prompt}
@@ -129,13 +129,14 @@ const CodeGenerator = () => {
                   style={vscDarkPlus}
                   customStyle={{
                     margin: 0,
-                    padding: '1.5rem',
+                    padding: '1rem',
                     background: '#1e1e1e',
                     fontSize: '0.875rem',
                     lineHeight: '1.6',
                   }}
                   showLineNumbers={true}
                   wrapLines={true}
+                  wrapLongLines={true}
                 >
                   {result}
                 </SyntaxHighlighter>

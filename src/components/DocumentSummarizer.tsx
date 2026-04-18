@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   uploadPaper,
   getPapers,
@@ -22,29 +22,42 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 import DocuMindLoader from "./DocuMindLoader";
+
+type PaperStats = {
+    total_chunks: number;
+    total_questions: number;
+};
+
 const DocumentSummarizer = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [selectedPaper, setSelectedPaper] = useState<number | null>(null);
   const [summary, setSummary] = useState<string>("");
+    const [factPoints, setFactPoints] = useState<string[]>([]);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<PaperStats | null>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load papers on mount
-  useEffect(() => {
-    fetchPapers();
-  }, []);
-
-  const fetchPapers = async () => {
+    const fetchPapers = useCallback(async () => {
     try {
       const data = await getPapers();
       setPapers(data);
     } catch (err) {
       console.error(err);
     }
-  };
+    }, []);
+
+    // Load papers on mount
+    useEffect(() => {
+        const fetchTimer = window.setTimeout(() => {
+            void fetchPapers();
+        }, 0);
+
+        return () => {
+            window.clearTimeout(fetchTimer);
+        };
+    }, [fetchPapers]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
@@ -64,12 +77,16 @@ const DocumentSummarizer = () => {
     setLoading(true);
     setAnswer(""); // Clear previous answer
     setQuestion("");
+        setFactPoints([]);
 
     try {
-      const summaryRes = await getSummary(paperId);
-      const statsRes = await getStats(paperId);
+            const [summaryRes, statsRes] = await Promise.all([
+                getSummary(paperId),
+                getStats(paperId),
+            ]);
 
       setSummary(summaryRes.summary);
+            setFactPoints(summaryRes.fact_points || []);
       setStats(statsRes);
     } catch (err) {
       console.error(err);
@@ -96,10 +113,10 @@ const DocumentSummarizer = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-6rem)] max-w-7xl mx-auto gap-6 p-6">
+        <div className="flex flex-col lg:flex-row h-full min-h-0 max-w-7xl mx-auto gap-4 sm:gap-6 p-3 sm:p-6">
       
       {/* LEFT COLUMN: Data Sources */}
-      <div className="w-full md:w-1/3 flex flex-col gap-6">
+            <div className="w-full lg:w-1/3 flex flex-col gap-4 sm:gap-6 min-h-0">
         
         {/* Header */}
         <div className="flex items-center gap-3 px-2">
@@ -115,7 +132,7 @@ const DocumentSummarizer = () => {
         {/* Upload Zone */}
         <div 
             onClick={() => fileInputRef.current?.click()}
-            className="group relative h-32 rounded-2xl border-2 border-dashed border-white/10 hover:border-indigo-500/50 bg-[#1e1e20]/50 hover:bg-[#1e1e20] transition-all cursor-pointer flex flex-col items-center justify-center gap-3 overflow-hidden"
+            className="group relative h-28 sm:h-32 rounded-2xl border-2 border-dashed border-white/10 hover:border-indigo-500/50 bg-[#1e1e20]/50 hover:bg-[#1e1e20] transition-all cursor-pointer flex flex-col items-center justify-center gap-3 overflow-hidden"
         >
             <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
             <Upload className="text-gray-500 group-hover:text-indigo-400 transition-colors" size={24} />
@@ -133,7 +150,7 @@ const DocumentSummarizer = () => {
         </div>
 
         {/* Paper List */}
-        <div className="flex-1 bg-[#1e1e20] border border-white/10 rounded-2xl p-4 overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-[180px] bg-[#1e1e20] border border-white/10 rounded-2xl p-4 overflow-hidden flex flex-col">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pl-2">Available Data</h3>
             <div className="overflow-y-auto space-y-2 custom-scrollbar pr-2 flex-1">
                 {papers.map((paper) => (
@@ -158,7 +175,7 @@ const DocumentSummarizer = () => {
       </div>
 
       {/* RIGHT COLUMN: Analysis Deck */}
-      <div className="flex-1 bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col shadow-2xl">
+    <div className="flex-1 min-h-0 bg-[#0a0a0b] border border-white/10 rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col shadow-2xl">
         
 {loading ? (
              // --- Loading State ---
@@ -176,7 +193,7 @@ const DocumentSummarizer = () => {
             <div className="flex-1 flex flex-col gap-6 overflow-hidden">
                 
                 {/* 1. HUD Stats Row */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     {stats && (
                         <>
                             <div className="bg-[#1e1e20] border border-white/10 rounded-xl p-4 flex items-center gap-4">
@@ -205,17 +222,32 @@ const DocumentSummarizer = () => {
                 </div>
 
                 {/* 2. Scrollable Content Area */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 sm:space-y-6 pr-1 sm:pr-2">
                     
                     {/* Summary Section */}
                     <div className="space-y-3">
                         <h2 className="text-lg font-bold text-white flex items-center gap-2">
                             <Sparkles size={18} className="text-yellow-400" /> Executive Summary
                         </h2>
-                        <div className="p-6 bg-[#151516] border border-white/5 rounded-2xl text-gray-300 leading-relaxed text-sm shadow-inner">
+                        <div className="p-4 sm:p-6 bg-[#151516] border border-white/5 rounded-2xl text-gray-300 leading-relaxed text-sm shadow-inner">
                             {summary}
                         </div>
                     </div>
+
+                    {factPoints.length > 0 && (
+                        <div className="space-y-3">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                                <Layers size={18} className="text-purple-400" /> Precomputed Fact Points
+                            </h2>
+                            <div className="p-4 sm:p-6 bg-[#151516] border border-white/5 rounded-2xl text-gray-300 text-sm shadow-inner">
+                                <ul className="list-disc list-inside space-y-2 marker:text-purple-400">
+                                    {factPoints.map((point, index) => (
+                                        <li key={`${index}-${point.slice(0, 16)}`}>{point}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Q&A Result Section */}
                     <AnimatePresence>
@@ -228,7 +260,7 @@ const DocumentSummarizer = () => {
                                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                     <MessageSquare size={18} className="text-cyan-400" /> AI Response
                                 </h2>
-                                <div className="p-6 bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-2xl text-indigo-100 leading-relaxed text-sm shadow-lg">
+                                <div className="p-4 sm:p-6 bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-2xl text-indigo-100 leading-relaxed text-sm shadow-lg">
                                     {answer}
                                 </div>
                             </motion.div>

@@ -17,6 +17,7 @@ const TextGenerator = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -29,9 +30,9 @@ const TextGenerator = () => {
         const userMessage = prompt;
         setPrompt(""); 
         
-        // Reset textarea height manually if needed, though React state usually handles content
-        const textarea = document.querySelector('textarea');
-        if (textarea) textarea.style.height = '56px';
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "56px";
+        }
 
         setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
         setLoading(true);
@@ -39,7 +40,7 @@ const TextGenerator = () => {
         try {
             const data = await generateText({ prompt: userMessage });
             setMessages((prev) => [...prev, { role: "ai", content: data.response }]);
-        } catch (error) {
+        } catch {
             setMessages((prev) => [...prev, { role: "ai", content: "Sorry, I encountered an error." }]);
         } finally {
             setLoading(false);
@@ -47,15 +48,15 @@ const TextGenerator = () => {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-6rem)] max-w-4xl mx-auto">
+        <div className="flex flex-col h-full min-h-0 max-w-4xl mx-auto">
             {/* Empty State / Welcome Screen */}
             {messages.length === 0 && (
-                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 px-3 sm:px-0">
                     <div className="mb-4 flex justify-center scale-125">
                         <AuraOrb />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
+                        <h2 className="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
                             How can I help you today master?
                         </h2>
                         <p className="text-gray-500 font-medium">Powered by Gym</p>
@@ -64,7 +65,7 @@ const TextGenerator = () => {
             )}
 
             {/* Chat History */}
-            <div className={`flex-1 overflow-y-auto space-y-6 py-6 px-2 ${messages.length > 0 ? "block" : "hidden"}`}>
+            <div className={`flex-1 overflow-y-auto space-y-4 sm:space-y-6 py-4 sm:py-6 px-1 sm:px-2 ${messages.length > 0 ? "block" : "hidden"}`}>
                 <AnimatePresence>
                     {messages.map((msg, index) => (
                         <motion.div 
@@ -82,7 +83,7 @@ const TextGenerator = () => {
 
                             {/* Message Bubble */}
                             <div className={`
-                                max-w-[85%] rounded-2xl p-4 leading-relaxed overflow-hidden shadow-sm
+                                max-w-[92%] sm:max-w-[85%] rounded-2xl p-3 sm:p-4 leading-relaxed overflow-hidden shadow-sm
                                 ${msg.role === "user" 
                                     ? "bg-[#2f2f32] text-white rounded-tr-sm" 
                                     : "text-gray-200"
@@ -93,27 +94,27 @@ const TextGenerator = () => {
                                         <ReactMarkdown 
                                             remarkPlugins={[remarkGfm]}
                                             components={{
-                                                table: ({node, ...props}) => (
+                                                table: (props) => (
                                                     <div className="overflow-x-auto my-4 border border-white/10 rounded-lg">
                                                         <table className="min-w-full divide-y divide-white/10 bg-white/5" {...props} />
                                                     </div>
                                                 ),
-                                                th: ({node, ...props}) => (
+                                                th: (props) => (
                                                     <th className="px-4 py-3 text-left text-xs font-bold text-indigo-300 uppercase tracking-wider bg-white/10 border-b border-white/10" {...props} />
                                                 ),
-                                                td: ({node, ...props}) => (
+                                                td: (props) => (
                                                     <td className="px-4 py-3 text-sm text-gray-300 border-b border-white/5 last:border-0" {...props} />
                                                 ),
-                                                h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-white mt-6 mb-4 pb-2 border-b border-white/10" {...props} />,
-                                                h2: ({node, ...props}) => <h2 className="text-xl font-bold text-white mt-6 mb-3" {...props} />,
-                                                h3: ({node, ...props}) => <h3 className="text-lg font-bold text-indigo-400 mt-4 mb-2" {...props} />,
-                                                strong: ({node, ...props}) => <strong className="font-bold text-white" {...props} />,
-                                                blockquote: ({node, ...props}) => (
+                                                h1: (props) => <h1 className="text-2xl font-bold text-white mt-6 mb-4 pb-2 border-b border-white/10" {...props} />,
+                                                h2: (props) => <h2 className="text-xl font-bold text-white mt-6 mb-3" {...props} />,
+                                                h3: (props) => <h3 className="text-lg font-bold text-indigo-400 mt-4 mb-2" {...props} />,
+                                                strong: (props) => <strong className="font-bold text-white" {...props} />,
+                                                blockquote: (props) => (
                                                     <blockquote className="border-l-4 border-indigo-500 pl-4 italic text-gray-400 my-4 bg-white/5 py-2 pr-2 rounded-r" {...props} />
                                                 ),
-                                                ul: ({node, ...props}) => <ul className="list-disc list-inside space-y-1 my-2 marker:text-indigo-400" {...props} />,
-                                                ol: ({node, ...props}) => <ol className="list-decimal list-inside space-y-1 my-2 marker:text-indigo-400" {...props} />,
-                                                code: ({node, ...props}) => (
+                                                ul: (props) => <ul className="list-disc list-inside space-y-1 my-2 marker:text-indigo-400" {...props} />,
+                                                ol: (props) => <ol className="list-decimal list-inside space-y-1 my-2 marker:text-indigo-400" {...props} />,
+                                                code: (props) => (
                                                     <code className="bg-black/30 px-1.5 py-0.5 rounded text-indigo-300 font-mono text-xs" {...props} />
                                                 ),
                                             }}
@@ -155,7 +156,7 @@ const TextGenerator = () => {
             </div>
 
             {/* --- UPGRADED INPUT BAR --- */}
-            <div className="sticky bottom-0 bg-[#0d0d0e] pt-4 pb-6 px-4">
+            <div className="sticky bottom-0 bg-[#0d0d0e] pt-3 sm:pt-4 pb-[max(env(safe-area-inset-bottom),1.25rem)] sm:pb-6 px-1 sm:px-4">
                 <div className="max-w-4xl mx-auto relative group">
                     
                     {/* 1. The Gradient Glow Effect (Visible on Focus) */}
@@ -170,6 +171,7 @@ const TextGenerator = () => {
                         </button>
 
                         <textarea
+                            ref={textareaRef}
                             rows={1}
                             className="w-full py-4 bg-transparent resize-none focus:outline-none placeholder-gray-500 text-gray-200 max-h-48 overflow-y-auto leading-relaxed scrollbar-hide"
                             placeholder="Message Nexus AI..."
