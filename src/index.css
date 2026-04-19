@@ -4,6 +4,167 @@
 
 :root {
 	--app-height: 100dvh;
+	--app-bg: #050505;
+	--app-text: #e5e7eb;
+	--text-muted: #9ca3af;
+	--text-soft: #6b7280;
+	--placeholder: #6b7280;
+	--surface-elevated: rgba(10, 10, 11, 0.82);
+	--surface-overlay: rgba(5, 5, 5, 0.5);
+	--surface-panel: rgba(30, 30, 32, 0.9);
+	--surface-card: rgba(21, 21, 22, 0.9);
+	--surface-input: rgba(10, 10, 11, 0.92);
+	--surface-chip: rgba(255, 255, 255, 0.05);
+	--surface-chip-hover: rgba(255, 255, 255, 0.1);
+	--surface-user-bubble: #2f2f32;
+	--border-subtle: rgba(255, 255, 255, 0.08);
+	--border-strong: rgba(255, 255, 255, 0.14);
+	--bg-orb-primary: rgba(49, 46, 129, 0.12);
+	--bg-orb-secondary: rgba(8, 145, 178, 0.12);
+	--bg-orb-tertiary: rgba(67, 56, 202, 0.12);
+	--bg-gradient-mesh: radial-gradient(circle at 14% 24%, rgba(79, 70, 229, 0.22), transparent 46%), radial-gradient(circle at 82% 20%, rgba(34, 211, 238, 0.18), transparent 42%), radial-gradient(circle at 52% 82%, rgba(168, 85, 247, 0.14), transparent 46%);
+	--texture-grid: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 28px), repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 28px);
+	--texture-lines: repeating-linear-gradient(130deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 13px);
+	--texture-grid-opacity-base: 0.24;
+	--texture-lines-opacity-base: 0.22;
+	--vignette: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.45) 100%);
+	--noise-opacity-base: 0.03;
+	--ui-grid-opacity: 0.24;
+	--ui-lines-opacity: 0.22;
+	--ui-noise-opacity: 0.03;
+	--pointer-x: 50%;
+	--pointer-y: 50%;
+	--parallax-x: 0px;
+	--parallax-y: 0px;
+	--parallax-grid-x: 0px;
+	--parallax-grid-y: 0px;
+	--parallax-lines-x: 0px;
+	--parallax-lines-y: 0px;
+	--interactive-opacity-base: 0.18;
+	--ui-interactive-opacity: 0.18;
+	--interactive-highlight: radial-gradient(320px circle at var(--pointer-x) var(--pointer-y), rgba(99, 102, 241, 0.36) 0%, rgba(99, 102, 241, 0.14) 24%, rgba(99, 102, 241, 0.04) 46%, transparent 72%);
+	--accent-primary: #6366f1;
+	--accent-secondary: #8b5cf6;
+	--accent-tertiary: #22d3ee;
+	--success: #10b981;
+	--warning: #f59e0b;
+	--muted-text: #9ca3af;
+	--selection-bg: rgba(99, 102, 241, 0.35);
+	--selection-text: #f8fafc;
+}
+
+:root[data-theme="aurora"] {
+	--app-bg: #071015;
+	--app-text: #d7f7ff;
+	--text-muted: #8bb6c4;
+	--text-soft: #5b8594;
+	--placeholder: #5b8594;
+	--surface-elevated: rgba(9, 22, 30, 0.82);
+	--surface-overlay: rgba(5, 15, 22, 0.52);
+	--surface-panel: rgba(9, 25, 33, 0.92);
+	--surface-card: rgba(10, 30, 39, 0.9);
+	--surface-input: rgba(5, 19, 27, 0.95);
+	--surface-chip: rgba(110, 231, 255, 0.1);
+	--surface-chip-hover: rgba(110, 231, 255, 0.16);
+	--surface-user-bubble: #153749;
+	--border-subtle: rgba(110, 231, 255, 0.2);
+	--border-strong: rgba(110, 231, 255, 0.34);
+	--bg-orb-primary: rgba(6, 182, 212, 0.2);
+	--bg-orb-secondary: rgba(34, 197, 94, 0.14);
+	--bg-orb-tertiary: rgba(56, 189, 248, 0.18);
+	--bg-gradient-mesh: radial-gradient(circle at 18% 22%, rgba(6, 182, 212, 0.26), transparent 45%), radial-gradient(circle at 82% 30%, rgba(45, 212, 191, 0.18), transparent 48%), radial-gradient(circle at 48% 82%, rgba(56, 189, 248, 0.14), transparent 44%);
+	--texture-grid: repeating-linear-gradient(to right, rgba(125, 211, 252, 0.08) 0 1px, transparent 1px 30px), repeating-linear-gradient(to bottom, rgba(125, 211, 252, 0.08) 0 1px, transparent 1px 30px);
+	--texture-lines: repeating-linear-gradient(150deg, rgba(45, 212, 191, 0.08) 0 1px, transparent 1px 14px);
+	--texture-grid-opacity-base: 0.24;
+	--texture-lines-opacity-base: 0.22;
+	--vignette: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 38%, rgba(2, 6, 23, 0.28) 100%);
+	--noise-opacity-base: 0.028;
+	--interactive-opacity-base: 0.16;
+	--interactive-highlight: radial-gradient(320px circle at var(--pointer-x) var(--pointer-y), rgba(34, 211, 238, 0.34) 0%, rgba(34, 211, 238, 0.14) 24%, rgba(45, 212, 191, 0.05) 46%, transparent 72%);
+	--accent-primary: #22d3ee;
+	--accent-secondary: #38bdf8;
+	--accent-tertiary: #2dd4bf;
+	--success: #34d399;
+	--warning: #fbbf24;
+	--muted-text: #8bb6c4;
+	--selection-bg: rgba(34, 211, 238, 0.3);
+	--selection-text: #ecfeff;
+}
+
+:root[data-theme="solstice"] {
+	--app-bg: #160b08;
+	--app-text: #ffe9dc;
+	--text-muted: #f2b39d;
+	--text-soft: #b27d6c;
+	--placeholder: #b27d6c;
+	--surface-elevated: rgba(35, 15, 12, 0.86);
+	--surface-overlay: rgba(24, 10, 8, 0.58);
+	--surface-panel: rgba(46, 20, 16, 0.92);
+	--surface-card: rgba(38, 17, 13, 0.93);
+	--surface-input: rgba(28, 12, 9, 0.96);
+	--surface-chip: rgba(251, 146, 60, 0.12);
+	--surface-chip-hover: rgba(251, 146, 60, 0.2);
+	--surface-user-bubble: #4a1f18;
+	--border-subtle: rgba(251, 146, 60, 0.18);
+	--border-strong: rgba(251, 146, 60, 0.32);
+	--bg-orb-primary: rgba(239, 68, 68, 0.2);
+	--bg-orb-secondary: rgba(249, 115, 22, 0.18);
+	--bg-orb-tertiary: rgba(251, 146, 60, 0.17);
+	--bg-gradient-mesh: radial-gradient(circle at 15% 24%, rgba(251, 113, 133, 0.24), transparent 44%), radial-gradient(circle at 82% 28%, rgba(249, 115, 22, 0.24), transparent 46%), radial-gradient(circle at 50% 84%, rgba(251, 146, 60, 0.14), transparent 42%);
+	--texture-grid: repeating-linear-gradient(to right, rgba(253, 186, 116, 0.08) 0 1px, transparent 1px 30px), repeating-linear-gradient(to bottom, rgba(253, 186, 116, 0.08) 0 1px, transparent 1px 30px);
+	--texture-lines: repeating-linear-gradient(140deg, rgba(251, 146, 60, 0.08) 0 1px, transparent 1px 13px);
+	--texture-grid-opacity-base: 0.24;
+	--texture-lines-opacity-base: 0.22;
+	--vignette: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 38%, rgba(21, 10, 8, 0.42) 100%);
+	--noise-opacity-base: 0.03;
+	--interactive-opacity-base: 0.16;
+	--interactive-highlight: radial-gradient(320px circle at var(--pointer-x) var(--pointer-y), rgba(249, 115, 22, 0.35) 0%, rgba(249, 115, 22, 0.14) 24%, rgba(244, 63, 94, 0.05) 46%, transparent 72%);
+	--accent-primary: #f97316;
+	--accent-secondary: #f43f5e;
+	--accent-tertiary: #fb923c;
+	--success: #86efac;
+	--warning: #facc15;
+	--muted-text: #f2b39d;
+	--selection-bg: rgba(249, 115, 22, 0.32);
+	--selection-text: #fff7ed;
+}
+
+:root[data-theme="light"] {
+	--app-bg: #edf3fb;
+	--app-text: #15273c;
+	--text-muted: #3f5671;
+	--text-soft: #6e8299;
+	--placeholder: #758aa1;
+	--surface-elevated: rgba(255, 255, 255, 0.75);
+	--surface-overlay: rgba(240, 246, 252, 0.78);
+	--surface-panel: rgba(255, 255, 255, 0.9);
+	--surface-card: rgba(250, 253, 255, 0.95);
+	--surface-input: rgba(244, 248, 253, 0.96);
+	--surface-chip: rgba(19, 48, 82, 0.06);
+	--surface-chip-hover: rgba(19, 48, 82, 0.11);
+	--surface-user-bubble: #2563eb;
+	--border-subtle: rgba(28, 60, 97, 0.14);
+	--border-strong: rgba(28, 60, 97, 0.22);
+	--bg-orb-primary: rgba(37, 99, 235, 0.18);
+	--bg-orb-secondary: rgba(14, 165, 233, 0.14);
+	--bg-orb-tertiary: rgba(20, 184, 166, 0.14);
+	--bg-gradient-mesh: radial-gradient(circle at 16% 20%, rgba(37, 99, 235, 0.2), transparent 44%), radial-gradient(circle at 84% 24%, rgba(14, 165, 233, 0.15), transparent 46%), radial-gradient(circle at 48% 82%, rgba(20, 184, 166, 0.12), transparent 44%);
+	--texture-grid: repeating-linear-gradient(to right, rgba(30, 64, 112, 0.08) 0 1px, transparent 1px 28px), repeating-linear-gradient(to bottom, rgba(30, 64, 112, 0.08) 0 1px, transparent 1px 28px);
+	--texture-lines: repeating-linear-gradient(130deg, rgba(37, 99, 235, 0.06) 0 1px, transparent 1px 14px);
+	--texture-grid-opacity-base: 0.24;
+	--texture-lines-opacity-base: 0.22;
+	--vignette: radial-gradient(ellipse at center, rgba(255, 255, 255, 0) 38%, rgba(177, 200, 228, 0.34) 100%);
+	--noise-opacity-base: 0.02;
+	--interactive-opacity-base: 0.18;
+	--interactive-highlight: radial-gradient(320px circle at var(--pointer-x) var(--pointer-y), rgba(37, 99, 235, 0.25) 0%, rgba(37, 99, 235, 0.11) 24%, rgba(14, 165, 233, 0.05) 46%, transparent 72%);
+	--accent-primary: #2563eb;
+	--accent-secondary: #0ea5e9;
+	--accent-tertiary: #14b8a6;
+	--success: #16a34a;
+	--warning: #ca8a04;
+	--muted-text: #3f5671;
+	--selection-bg: rgba(37, 99, 235, 0.25);
+	--selection-text: #0b1c2e;
 }
 
 html,
@@ -16,18 +177,99 @@ body,
 	padding: 0;
 }
 
+html,
+body,
+#root,
+* {
+	scroll-behavior: smooth;
+}
+
 body {
 	overflow: hidden;
-	background: #050505;
-	color: #e5e7eb;
+	background: var(--app-bg);
+	color: var(--app-text);
+	transition: background-color 240ms ease, color 240ms ease;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.custom-scrollbar,
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+.nova-select {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	line-height: 1.2;
+}
+
+.nova-select option {
+	background-color: var(--surface-panel);
+	color: var(--app-text);
+}
+
+.nova-select:disabled {
+	cursor: not-allowed;
+}
+
+.custom-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+* {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+:root[data-theme="light"] .text-white {
+	color: var(--app-text) !important;
+}
+
+::selection {
+	background: var(--selection-bg);
+	color: var(--selection-text);
 }
 
 [data-device="mobile"] body {
 	overscroll-behavior-y: contain;
 }
 
+[data-device="mobile"] {
+	--interactive-opacity-base: 0.08;
+}
+
 @media (max-width: 767px) {
 	#root {
 		padding-bottom: env(safe-area-inset-bottom);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html,
+	body,
+	#root,
+	* {
+		scroll-behavior: auto !important;
 	}
 }

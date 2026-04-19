@@ -1,8 +1,19 @@
 import axios from "axios";
 import type {
   PromptRequest,
+  SessionMode,
   TextResponse,
   CodeResponse,
+  CodeExecutionRequest,
+  CodeExecutionResponse,
+  OpenRouterModelsResponse,
+  NovaMemorySnapshotResponse,
+  NovaMemoryClearResponse,
+  NovaMemoryModeResponse,
+  NovaBridgeExportRequest,
+  NovaBridgeExportResponse,
+  NovaBridgeImportRequest,
+  NovaBridgeImportResponse,
   AskRequest,
   SearchRequest,
   Paper,
@@ -11,6 +22,17 @@ import type {
   StatsResponse,
   SummaryResponse
 } from "../types/api";
+
+type TextStreamEvent =
+  | { type: "chunk"; content: string }
+  | { type: "done"; session_mode?: SessionMode | string }
+  | { type: "error"; message: string };
+
+type TextStreamHandlers = {
+  onChunk?: (chunk: string) => void;
+  onDone?: (sessionMode?: SessionMode | string) => void;
+  onError?: (message: string) => void;
+};
 
 const trimSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -52,6 +74,159 @@ export const generateText = async (
   return response.data;
 };
 
+export const getOpenRouterModels = async (): Promise<OpenRouterModelsResponse> => {
+  const response = await API.get<OpenRouterModelsResponse>("/models/openrouter");
+  return response.data;
+};
+
+export const getNovaMemory = async (sessionId: string): Promise<NovaMemorySnapshotResponse> => {
+  const response = await API.get<NovaMemorySnapshotResponse>(`/memory/${encodeURIComponent(sessionId)}`);
+  return response.data;
+};
+
+export const getNovaMemoryMode = async (sessionId: string): Promise<NovaMemoryModeResponse> => {
+  const response = await API.get<NovaMemoryModeResponse>(`/memory/${encodeURIComponent(sessionId)}/mode`);
+  return response.data;
+};
+
+export const setNovaMemoryMode = async (
+  sessionId: string,
+  mode: SessionMode | string
+): Promise<NovaMemoryModeResponse> => {
+  const response = await API.post<NovaMemoryModeResponse>(`/memory/${encodeURIComponent(sessionId)}/mode`, { mode });
+  return response.data;
+};
+
+export const getNovaMemoryByMode = async (
+  sessionId: string,
+  mode?: SessionMode | string
+): Promise<NovaMemorySnapshotResponse> => {
+  const query = mode ? `?mode=${encodeURIComponent(mode)}` : "";
+  const response = await API.get<NovaMemorySnapshotResponse>(`/memory/${encodeURIComponent(sessionId)}${query}`);
+  return response.data;
+};
+
+export const clearNovaMemory = async (
+  sessionId: string,
+  mode?: SessionMode | string
+): Promise<NovaMemoryClearResponse> => {
+  const query = mode ? `?mode=${encodeURIComponent(mode)}` : "";
+  const response = await API.delete<NovaMemoryClearResponse>(`/memory/${encodeURIComponent(sessionId)}${query}`);
+  return response.data;
+};
+
+export const exportNovaKnowledgeBridge = async (
+  data: NovaBridgeExportRequest
+): Promise<NovaBridgeExportResponse> => {
+  const response = await API.post<NovaBridgeExportResponse>("/memory/bridge/export", data);
+  return response.data;
+};
+
+export const importNovaKnowledgeBridge = async (
+  data: NovaBridgeImportRequest
+): Promise<NovaBridgeImportResponse> => {
+  const response = await API.post<NovaBridgeImportResponse>("/memory/bridge/import", data);
+  return response.data;
+};
+
+export const generateTextStream = async (
+  data: PromptRequest,
+  handlers: TextStreamHandlers = {},
+  signal?: AbortSignal
+): Promise<void> => {
+  const baseUrl = API.defaults.baseURL || resolveApiBaseUrl();
+  const response = await fetch(`${baseUrl}/generate-text/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+    signal,
+  });
+
+  if (!response.ok) {
+    let detail = `Stream request failed (${response.status})`;
+    try {
+      const payload = await response.json();
+      if (payload?.detail) {
+        detail = String(payload.detail);
+      }
+    } catch {
+      // Keep default error detail.
+    }
+
+    throw new Error(detail);
+  }
+
+  if (!response.body) {
+    throw new Error("Streaming response body is not available");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let doneEventSeen = false;
+
+  const handleEvent = (raw: string) => {
+    const dataValue = raw
+      .split("\n")
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trim())
+      .join("");
+
+    if (!dataValue) {
+      return;
+    }
+
+    let event: TextStreamEvent;
+    try {
+      event = JSON.parse(dataValue) as TextStreamEvent;
+    } catch {
+      return;
+    }
+
+    if (event.type === "chunk") {
+      handlers.onChunk?.(event.content);
+      return;
+    }
+
+    if (event.type === "error") {
+      handlers.onError?.(event.message);
+      throw new Error(event.message);
+    }
+
+    if (event.type === "done") {
+      doneEventSeen = true;
+      handlers.onDone?.(event.session_mode);
+    }
+  };
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done }).replace(/\r\n/g, "\n");
+
+    let boundaryIndex = buffer.indexOf("\n\n");
+    while (boundaryIndex >= 0) {
+      const eventBlock = buffer.slice(0, boundaryIndex).trim();
+      buffer = buffer.slice(boundaryIndex + 2);
+
+      if (eventBlock) {
+        handleEvent(eventBlock);
+      }
+
+      boundaryIndex = buffer.indexOf("\n\n");
+    }
+
+    if (done) {
+      break;
+    }
+  }
+
+  if (!doneEventSeen) {
+    handlers.onDone?.();
+  }
+};
+
 export const generateCode = async (
   data: PromptRequest
 ): Promise<CodeResponse> => {
@@ -59,6 +234,13 @@ export const generateCode = async (
     "/generate-code",
     data
   );
+  return response.data;
+};
+
+export const executeCode = async (
+  data: CodeExecutionRequest
+): Promise<CodeExecutionResponse> => {
+  const response = await API.post<CodeExecutionResponse>("/execute", data);
   return response.data;
 };
 
