@@ -689,7 +689,7 @@ const TextGenerator = () => {
                             ref={textareaRef}
                             rows={1}
                             className="w-full px-4 py-4 bg-transparent resize-none focus:outline-none placeholder-[var(--placeholder)] text-[var(--app-text)] max-h-48 overflow-y-auto leading-relaxed scrollbar-hide"
-                            placeholder={sessionMode === "volatile" ? "Ask privately in incognito mode..." : "Message Nexus AI..."}
+                            placeholder={sessionMode === "volatile" ? "Ask privately in incognito mode..." : "Message NOVA AI..."}
                             value={prompt}
                             onChange={(e) => {
                                 setPrompt(e.target.value);

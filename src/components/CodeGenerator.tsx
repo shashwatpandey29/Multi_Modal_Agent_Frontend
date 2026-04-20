@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Editor from "@monaco-editor/react";
 import { executeCode, generateText } from "../api/api";
 import {
   Bot,
@@ -33,6 +34,17 @@ type LanguageOption = {
   judge0Id: number;
   extension: string;
   starter: string;
+};
+
+const MONACO_LANGUAGE_BY_COMPILER_LANGUAGE: Record<CompilerLanguage, string> = {
+  javascript: "javascript",
+  python: "python",
+  sql: "sql",
+  java: "java",
+  c: "c",
+  cpp: "cpp",
+  rust: "rust",
+  go: "go",
 };
 
 const CODE_STORAGE_PREFIX = "nova-compiler-code";
@@ -154,13 +166,14 @@ const CodeGenerator = () => {
 
   const [mobileView, setMobileView] = useState<MobileView>("editor");
 
-  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const monacoEditorRef = useRef<{ focus: () => void } | null>(null);
   const assistantBottomRef = useRef<HTMLDivElement>(null);
 
   const selectedLanguage = useMemo(
     () => LANGUAGE_OPTIONS.find((option) => option.id === activeLanguage) || LANGUAGE_OPTIONS[0],
     [activeLanguage]
   );
+  const monacoLanguage = useMemo(() => MONACO_LANGUAGE_BY_COMPILER_LANGUAGE[activeLanguage], [activeLanguage]);
 
   const storageKey = useMemo(() => `${CODE_STORAGE_PREFIX}-${activeLanguage}`, [activeLanguage]);
 
@@ -228,7 +241,7 @@ const CodeGenerator = () => {
     setRunResult(null);
     setAssistantStatus("Restored starter template.");
     setAppliedMessageId(null);
-    editorRef.current?.focus();
+    monacoEditorRef.current?.focus();
   };
 
   const copyCode = async () => {
@@ -326,6 +339,10 @@ const CodeGenerator = () => {
     ? `Exit ${runResult.exitCode} • ${Math.round(runResult.timeMs)}ms${runResult.memoryKb ? ` • ${runResult.memoryKb}kb` : ""}`
     : "";
 
+  const inputRelatedRuntimeError = runResult?.stderr
+    ? /(eoferror|nosuchelementexception|inputmismatchexception|scanner|end of file|stdin)/i.test(runResult.stderr)
+    : false;
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-panel)]/90 p-3 sm:p-4 shadow-xl backdrop-blur-xl">
@@ -385,7 +402,7 @@ const CodeGenerator = () => {
         </div>
 
         <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
-          {selectedLanguage.label} compiler • Press Ctrl/Cmd + Enter inside editor to run
+          {selectedLanguage.label} compiler
         </div>
       </div>
 
@@ -437,27 +454,26 @@ const CodeGenerator = () => {
               <span className="text-[11px] text-[var(--text-soft)]">{code.split("\n").length} lines</span>
             </div>
 
-            <textarea
-              ref={editorRef}
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              onKeyDown={(event) => {
-                if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-                  event.preventDefault();
-                  void handleRun();
-                }
-              }}
-              className="w-full min-h-[320px] sm:min-h-[420px] lg:min-h-[440px] p-4 sm:p-5 bg-[var(--surface-input)] text-[13px] sm:text-sm leading-6 font-mono text-[var(--app-text)] resize-y outline-none"
-              spellCheck={false}
-            />
-
-            <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-chip)]/70 p-3 sm:p-4 space-y-2">
-              <label className="text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">Standard Input (optional)</label>
-              <textarea
-                value={stdin}
-                onChange={(event) => setStdin(event.target.value)}
-                className="w-full h-20 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-panel)] px-3 py-2 text-xs sm:text-sm font-mono text-[var(--app-text)] outline-none"
-                placeholder="Input passed to your program"
+            <div className="h-[320px] sm:h-[420px] lg:h-[440px] bg-[var(--surface-input)]">
+              <Editor
+                height="100%"
+                language={monacoLanguage}
+                value={code}
+                onChange={(value) => setCode(value ?? "")}
+                onMount={(editor) => {
+                  monacoEditorRef.current = editor;
+                }}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  lineNumbers: "on",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: "off",
+                  smoothScrolling: true,
+                  padding: { top: 14, bottom: 14 },
+                }}
               />
             </div>
           </section>
@@ -473,6 +489,42 @@ const CodeGenerator = () => {
                 Runtime Output
               </span>
               <span className="text-[11px] text-[var(--text-soft)]">{resultSummary || "Idle"}</span>
+            </div>
+
+            <div className="p-3 sm:p-4 border-b border-[var(--border-subtle)] bg-[var(--surface-chip)]/35 space-y-2.5">
+              <label className="text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">Program Input (stdin)</label>
+              <textarea
+                value={stdin}
+                onChange={(event) => setStdin(event.target.value)}
+                className="w-full h-24 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-panel)] px-3 py-2 text-xs sm:text-sm font-mono text-[var(--app-text)] outline-none"
+                placeholder="Enter input values used by your code (example: 5 7 or one value per line)"
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <p className="text-[11px] text-[var(--text-soft)]">
+                  Works for Python input(), Java Scanner, C/C++ stdin, and similar runtime input.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleRun}
+                  disabled={isRunning || !code.trim()}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-primary)] px-3 py-2 text-xs sm:text-sm font-medium text-white disabled:opacity-55 disabled:cursor-not-allowed"
+                >
+                  {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
+                  {isRunning ? "Running" : "Run With Input"}
+                </button>
+              </div>
+
+              <p className="text-[11px] text-[var(--text-soft)]">
+                Enter all input values before running. This runtime executes in one shot and does not support live prompt-by-prompt typing.
+              </p>
+
+              {inputRelatedRuntimeError ? (
+                <p className="text-[11px] text-amber-300">
+                  Your last run looks input-related. Update stdin above and run again.
+                </p>
+              ) : null}
             </div>
 
             {runResult ? (
@@ -496,7 +548,7 @@ const CodeGenerator = () => {
                 ) : null}
               </div>
             ) : (
-              <div className="p-5 sm:p-6 text-sm text-[var(--text-muted)]">Run your code to see compiler/runtime output.</div>
+              <div className="p-5 sm:p-6 text-sm text-[var(--text-muted)]">Add optional stdin above, then run your code to see compiler/runtime output.</div>
             )}
           </section>
         </div>

@@ -17,6 +17,7 @@ import {
   Gauge,
   Layers3,
   MousePointer2,
+  LineChart,
 } from "lucide-react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { gsap } from "gsap";
@@ -27,8 +28,9 @@ const TextGenerator = lazy(() => import("./components/TextGenerator"));
 const CodeGenerator = lazy(() => import("./components/CodeGenerator"));
 const ImageGenerator = lazy(() => import("./components/ImageGenerator"));
 const DocumentSummarizer = lazy(() => import("./components/DocumentSummarizer"));
+const FinanceIntelligence = lazy(() => import("./components/FinanceIntelligence"));
 
-type TabId = "text" | "code" | "image" | "docs";
+type TabId = "text" | "code" | "image" | "docs" | "finance";
 type DeviceType = "mobile" | "tablet" | "desktop";
 type Theme = "midnight" | "aurora" | "solstice" | "light";
 type PerformanceMode = "quality" | "balanced" | "smooth";
@@ -157,6 +159,7 @@ const MENU_ITEMS: MenuItem[] = [
   { id: "code", label: "Code Assistant", icon: <Code size={18} /> },
   { id: "image", label: "Image Studio", icon: <ImageIcon size={18} /> },
   { id: "docs", label: "DocuMind", icon: <FileText size={18} /> },
+  { id: "finance", label: "Finance Pulse", icon: <LineChart size={18} /> },
 ];
 
 const TAB_LOADING_LABEL: Record<TabId, string> = {
@@ -164,6 +167,7 @@ const TAB_LOADING_LABEL: Record<TabId, string> = {
   code: "Loading Code Assistant",
   image: "Loading Image Studio",
   docs: "Loading DocuMind",
+  finance: "Loading Finance Pulse",
 };
 
 const getInitialTheme = (): Theme => {
@@ -306,7 +310,7 @@ function SidebarPanel({
           <NexusLoader />
         </div>
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-[var(--app-text)] leading-none font-mono">NEXUS</h1>
+          <h1 className="text-lg font-bold tracking-tight text-[var(--app-text)] leading-none font-mono">NOVA</h1>
           <p className="text-[10px] text-[var(--text-soft)] font-medium mt-1 tracking-widest uppercase">
             {deviceType.toUpperCase()} MODE
           </p>
@@ -1100,6 +1104,11 @@ function App() {
                   {activeTab === "docs" && (
                     <Suspense fallback={tabFallback}>
                       <DocumentSummarizer />
+                    </Suspense>
+                  )}
+                  {activeTab === "finance" && (
+                    <Suspense fallback={tabFallback}>
+                      <FinanceIntelligence />
                     </Suspense>
                   )}
                 </div>

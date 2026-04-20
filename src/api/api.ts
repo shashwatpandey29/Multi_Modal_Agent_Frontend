@@ -20,7 +20,10 @@ import type {
   UploadResponse,
   AnalysisResponse,
   StatsResponse,
-  SummaryResponse
+  SummaryResponse,
+  FinanceProvidersResponse,
+  FinanceCompaniesResponse,
+  FinanceCompanyIntelResponse
 } from "../types/api";
 
 type TextStreamEvent =
@@ -334,5 +337,42 @@ export const searchPaper = async (
   data: SearchRequest
 ) => {
   const response = await API.post("/search", data);
+  return response.data;
+};
+
+/* ======================================================
+   💹 FINANCE INTELLIGENCE
+====================================================== */
+
+export const getFinanceProviders = async (): Promise<FinanceProvidersResponse> => {
+  const response = await API.get<FinanceProvidersResponse>("/finance/providers");
+  return response.data;
+};
+
+export const getFinanceCompanies = async (
+  query: string,
+  limit = 600
+): Promise<FinanceCompaniesResponse> => {
+  const response = await API.get<FinanceCompaniesResponse>("/finance/companies", {
+    params: {
+      query,
+      limit,
+    },
+  });
+  return response.data;
+};
+
+export const getFinanceCompanyIntel = async (
+  symbol: string,
+  points = 60,
+  newsLimit = 20
+): Promise<FinanceCompanyIntelResponse> => {
+  const response = await API.get<FinanceCompanyIntelResponse>("/finance/company-intel", {
+    params: {
+      symbol,
+      points,
+      news_limit: newsLimit,
+    },
+  });
   return response.data;
 };
